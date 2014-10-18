@@ -1,0 +1,204 @@
+#ifndef BST_HPP
+#define BST_HPP
+#include "BSTNode.hpp"
+#include "BSTIterator.hpp"
+#include <utility> // for std::pair
+
+template<typename Data>
+class BST {
+
+protected:
+
+  /** Pointer to the root of this BST, or nullptr if the BST is empty */
+  BSTNode<Data>* root;
+
+  /** Number of Data items stored in this BST. */
+  unsigned int isize;
+
+
+public:
+
+  /** iterator is an aliased typename for BSTIterator<Data>. */
+  typedef BSTIterator<Data> iterator;
+
+  /** Default constructor.
+      Initialize an empty BST.
+   */
+  BST() : root(nullptr), isize(0)  {
+  }
+
+
+  /** Default destructor.
+   *  It is virtual, to allow appropriate destruction of subclass objects.
+   *  Delete every node in this BST.
+   */ // TODO
+  virtual ~BST() {
+    clear();
+  }
+
+  /** Insert a Data item in the BST.
+   *  Return a pair, with the pair's first member set to an
+   *  iterator pointing to either the newly inserted element
+   *  or to the equivalent element already in the set.
+   *  The pair's second element is set to true
+   *  if a new element was inserted or false if an
+   *  equivalent element already existed.
+   */ // TODO
+  virtual std::pair<iterator,bool> insert(const Data& item){
+    bool inserted = false;
+    
+    BSTNode<Data> *curr =root; /* root pointer */
+    BSTNode<Data> *insNode= nullptr;  /* curret node tracker*/
+
+    //if there is an empty tree, create a new node and make it the root
+    // dont forget to make new node the root by setting root to insNode and
+    // set inserted true otherwise you didnt bother making a root node.
+    if (curr == nullptr)
+    {
+        insNode= new BSTNode<Data>(item);
+        root=insNode; 
+        inserted=true; 
+    }
+       //now we try and makee all the nodes for the tree since it is true that
+       // insNode is NULL there for we could go into this loop 
+    while (insNode == nullptr){
+        //if the number is small then we go right (im going backwards)
+        if (curr->data < item) {
+            //transverse to the right of the tree
+            if (curr->right !=nullptr) {
+                curr=curr->right; 
+            }
+            // if there is no right subtree we would have to create one
+            else {
+                
+                insNode = new BSTNode<Data>(item);
+                //keep track of the previous node 
+                insNode->parent = curr; 
+
+                //now insert into the right side of tree
+                curr->right = insNode;
+                
+                //we mark the sucess of the insert
+                inserted=true; 
+            }
+
+        }
+        // if the curr's data has a value greater than item we move in the left 
+        //tree we move left.
+        else if (curr->data > item)
+        {        //transverse to the left we dont have nullptr
+                if (curr->left != nullptr)
+                {
+                    curr=curr->left;
+                }
+                  // this case is the same as inserting right but we change it to 
+                  //left 
+                else{
+                    //create a new node of left subtree
+                    insNode = new BSTNode<Data>(item);
+                    //keep track of the previous node 
+                    insNode->parent = curr; 
+
+                    //now insert into the right side of tree
+                    curr->left = insNode; 
+                    //mark the left side as true
+                    inserted=true; 
+                }
+
+        }
+        else {
+            //break out of the loop since te dta already exist in the tree
+            insNode=curr; 
+        }
+
+    }
+    /* if we correctly insereted into the treem we should increase the size */
+    if (inserted ==true) 
+       ++isize;
+      
+    std::pair<iterator,bool> ret(typename BST<Data>::iterator(insNode), inserted);
+
+    return ret;
+        
+  }
+
+
+  /** Find a Data item in the BST.
+   *  Return an iterator pointing to the item, or the end
+   *  iterator if the item is not in the BST.
+   */ // TODO
+  iterator find(const Data& item) const {
+      BSTNode<Data>* pointer = root;
+      while(pointer != nullptr){
+          if(pointer->data < item){
+              pointer = pointer->right;
+          }
+          else if( pointer->data >item){
+              pointer = pointer->left;
+          }
+          else{ // quit the while loop if we found the object
+              break;
+          }
+      }
+      return iterator(pointer);
+  }
+
+  
+  /** Return the number of items currently in the BST.
+   */ // TODO
+  unsigned int size() const {
+	return isize; 
+
+  }
+
+  /** Remove all elements from this BST, and destroy them,
+   *  leaving this BST with a size of 0.
+   */ // TODO
+  void clear() {
+    deleteAll(root);
+    root=nullptr; 
+    isize =0; 
+  }
+
+  /** Return true if the BST is empty, else false.
+   */ // TODO
+  bool empty() const {
+        if (isize > 0)
+            return false;
+         else 
+            return true;   
+  }
+
+  /** Return an iterator pointing to the first item in the BST.
+   */ // TODO
+  iterator begin() const {
+   return  typename BST<Data> :: iterator(first(root));
+  }
+
+  /** Return an iterator pointing past the last item in the BST.
+   */
+  iterator end() const {
+    return typename BST<Data>::iterator(nullptr);
+  }
+
+  private: 
+    /* in order destructor*/ 
+  static void  deleteAll(BSTNode<Data> * deletePtr ){
+        if ( deletePtr !=nullptr)
+            return ;
+           deleteAll(deletePtr->right);
+           deleteAll(deletePtr->left);
+           delete deletePtr; 
+       
+    } 
+  static BSTNode<Data>* first(BSTNode<Data>* root) {
+    if(root == 0) return 0;
+    while(root->left != 0) root = root->left;
+    return root;
+  }
+
+
+ };
+
+
+#endif //BST_HPP
